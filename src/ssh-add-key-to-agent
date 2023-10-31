@@ -1,0 +1,64 @@
+#! /bin/bash
+
+#> synopsis: TODO: write down.
+#> type: TODO: write down.
+#> comment: TODO: write down.
+
+if $(test -z "$@"); then
+	echo ''
+	echo "Usage: 'ssh-add-key-to-agent <name-of-rule-in-ssh-config-file>'"
+fi
+
+ssh_dir=~/.ssh/config
+host="$@"
+
+echo ''
+echo "Looking for '$host' among following hosts:"
+cat "$ssh_dir" | grep '^Host' | awk '{print $2}' | nl
+
+file=$(
+	cat "$ssh_dir" |
+		sed -n "/^Host[[:space:]]*$host[[:space:]]*$/,/^$/p" |
+		grep IdentityFile |
+		head -1 |
+		awk '{print $2}'
+)
+
+if $(test -z "$file"); then
+	echo ''
+	echo "Error:No entry was found in '$ssh_dir', no keyfile to add."
+	exit 1
+fi
+
+# TODO: get the correct ssh-agent pid for the current shell that runs this script.
+
+agent_pid=$(pgrep 'ssh-agent')
+
+if $(test -z "$agent_pid"); then
+	eval $(ssh-agent -s)
+	agent_pid=$(pgrep 'ssh-agent')
+else
+	echo ''
+	echo 'There is an ssh-agent running, not starting a new one.'
+	ps -e | grep 'ssh-agent'
+fi
+
+agent_num=$(echo "$agent_pid" | wc -l)
+if $(test "$agent_num" -ge 2); then
+	echo ''
+	echo "Error: there are multiple ($agent_num) ssh-agents running."
+	exit 1
+fi
+
+# Mayhap resolve tilde ('~') into home directory.
+file=$(eval echo "$file")
+
+echo ''
+echo 'Summary:'
+echo " - Key file:  '$file'"
+echo " - Agent pid: '$agent_pid'"
+echo ''
+echo "Adding key to ssh-agent? (Y/ctrl-c)"
+read xxx
+ssh-add "$file"
+echo "Done."

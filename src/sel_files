@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#> synopsis: TODO: write down.
+#> type: TODO: write down.
+#> comment: TODO: write down.
+
+file=/tmp/selected-file-list
+
+find . -type f >"$file"
+
+regex=$(
+	sel_files_helper "$file" |
+		vipe |
+		tr '\n' '|' |
+		sed 's/.$//'
+)
+
+cat "$file" |
+	grep -iE "($regex)$"
+
+rm -f "$file"

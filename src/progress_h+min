@@ -1,0 +1,11 @@
+#! /bin/bash
+
+function main() {
+	ht=$1
+	mt=$2
+	h=$3
+	m=$4
+	total=$(echo "($ht*60+$mt)" | bc -l)
+	echo "($h*60+$m)/$total*100" | bc -l | tr . % | sed "s/[^%]*$//"
+}
+main "$1" "$2" "$3" "$4"

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#> synopsis: TODO: write down.
+#> type: TODO: write down.
+#> comment: TODO: write down.
+
+file="$@"
+
+if $(test -z "$file"); then
+	file='/tmp/selected-file-list_temp'
+	find . -type f >"$file"
+	toggle=1
+fi
+
+cat "$file" |
+	grep -o '[^\\.]*$' |
+	sort |
+	uniq
+
+if $(test -n "$toggle"); then
+	rm -f "$file"
+fi

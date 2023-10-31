@@ -1,0 +1,8 @@
+#! /bin/bash
+
+#> synopsis: TODO: write down.
+#> type: TODO: write down.
+#> comment: TODO: write down.
+
+filename="$@"
+awk -v RS= '{print > ("split-at-nls_" NR ".txt")}' "$filename"
